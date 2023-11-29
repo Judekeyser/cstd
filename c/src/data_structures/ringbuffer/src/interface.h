@@ -12,10 +12,12 @@ typedef struct CstdRingBuffer * CstdRingBuffer;
 
 void cstd_ringbuffer_initialize(CstdRingBuffer self, Index capacity);
 
-int cstd_ringbuffer_write(CstdRingBuffer self, Index *index);
+int cstd_ringbuffer_write(CstdRingBuffer restrict self, Index * restrict index);
 
-int cstd_ringbuffer_read(CstdRingBuffer self, Index *index);
+int cstd_ringbuffer_read(CstdRingBuffer restrict self, Index * restrict index);
 
-Index cstd_ringbuffer_length(CstdRingBuffer self);
+int cstd_ringbuffer_is_empty(const CstdRingBuffer self);
+
+int cstd_ringbuffer_is_full(const CstdRingBuffer self);
 
 #endif

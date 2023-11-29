@@ -20,9 +20,11 @@ struct CharRingBuffer
     char data[6];
 };
 
-Index length(struct CharRingBuffer *buffer)
+static Index length(struct CharRingBuffer *buffer)
 {
-    return cstd_ringbuffer_length(&(buffer->ring_algebra));
+    const Index read = (buffer -> ring_algebra).read_cursor;
+    const Index write = (buffer -> ring_algebra).write_cursor;
+    return write - read;
 }
 
 int write(struct CharRingBuffer *buffer, char character)

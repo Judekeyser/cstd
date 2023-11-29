@@ -12,16 +12,15 @@ void cstd_ringbuffer_initialize(CstdRingBuffer self, Index capacity)
     *self = this;
 }
 
-int cstd_ringbuffer_write(CstdRingBuffer self, Index *index)
+int cstd_ringbuffer_write(CstdRingBuffer restrict self, Index * restrict index)
 {
-    struct CstdRingBuffer this = *self;
-
-    if(this.capacity + this.read_cursor == this.write_cursor) {
+    if(cstd_ringbuffer_is_full(self)) {
         return 1;
     } else {
-        *index = this.write_cursor - (
-            this.write_cursor >= this.capacity ? this.capacity : 0u
-        );
+        struct CstdRingBuffer this = *self;
+        const Index shift = this.write_cursor >= this.capacity ? this.capacity : 0u;
+
+        *index = this.write_cursor - shift;
 
         this.write_cursor += 1u;
 
@@ -30,29 +29,31 @@ int cstd_ringbuffer_write(CstdRingBuffer self, Index *index)
     }
 }
 
-int cstd_ringbuffer_read(CstdRingBuffer self, Index *index)
+int cstd_ringbuffer_read(CstdRingBuffer restrict self, Index * restrict index)
 {
-    struct CstdRingBuffer this = *self;
-
-    if(this.read_cursor == this.write_cursor) {
+    if(cstd_ringbuffer_is_empty(self)) {
         return 1;
     } else {
-        *index = this.read_cursor - (
-            this.read_cursor >= this.capacity ? this.capacity : 0u
-        );
+        struct CstdRingBuffer this = *self;
+        const Index shift = this.read_cursor >= this.capacity ? this.capacity : 0u;
+
+        *index = this.read_cursor - shift;
 
         this.read_cursor += 1u;
-        if(this.read_cursor >= this.capacity) {
-            this.read_cursor -= this.capacity;
-            this.write_cursor -= this.capacity;
-        }
+        this.read_cursor -= shift;
+        this.write_cursor -= shift;
 
         *self = this;
         return 0;
     }
 }
 
-Index cstd_ringbuffer_length(CstdRingBuffer self)
+int cstd_ringbuffer_is_empty(const CstdRingBuffer self)
 {
-    return self->write_cursor - self->read_cursor;
+    return self->read_cursor == self->write_cursor;
+}
+
+int cstd_ringbuffer_is_full(const CstdRingBuffer self)
+{
+    return self->read_cursor + self->capacity == self->write_cursor;
 }
